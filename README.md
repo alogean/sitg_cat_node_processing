@@ -1,4 +1,6 @@
-# Some node.js scripts used to process the SITG XML catalog 
+# SITG XML catalog processor
+
+Here some node.js scripts used to process the SITG XML catalog 
 
 ## Dependencies
 
