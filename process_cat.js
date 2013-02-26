@@ -1,6 +1,6 @@
 /*
 
-This modul dpends of the following modules:
+The following node.js modules must be installed :
 
   --> npm install findit
   --> npm install xmldom
@@ -17,10 +17,12 @@ function format_xpath_result(myarray) {
 
 }
 
-/*
-
-*/
-function dataset(doc, file_name) {
+//
+// Function that takes as input a DOM object and a string filename, 
+// extracts the needed informations by using different xpath expressions and
+// return a dataset object
+//
+function process_xml(doc, file_name) {
     
     var ds = {},
         select = require('xpath.js');
@@ -32,23 +34,19 @@ function dataset(doc, file_name) {
     ds.department   = format_xpath_result(select(doc, "//rpXTPartName/text()"));
     ds.organisation = format_xpath_result(select(doc, "//rpOrgName/text()"));
     ds.topic        = format_xpath_result(select(doc, "/metadata/dataIdInfo/tpCat/descXT/text()"));
-
-    return dataset;
+    
+    return ds;
 }
 
-/*
 
-This function go recursivelly through all the directories, parse all the xml files 
-and put the xpath results in a dataset object.
-
-*/
-exports.travers_sitg_xml_cat = function (directory) {
-
-    //console.log("filename, title, topic, organisation, acronyme, departement, title");
-    //console.log("acronyme, title");
+//
+// Function that goes recursivelly through all the directories contained in { root_directory } and return
+// an array of Dataset objects.
+//
+exports.travers_sitg_xml_cat = function (root_directory) {
     
-    var cat = [],
-        finder = require('findit').find(directory),
+    var catalog_array = [],
+        finder = require('findit').find(root_directory),
         fs = require('fs'),
         dom = require('xmldom').DOMParser;
 
@@ -56,19 +54,23 @@ exports.travers_sitg_xml_cat = function (directory) {
     finder.on('file', function (file) {
 
         var filename = file.split("/").last
+
         fs.readFile(file, 'utf8', function (err, data) {
             if (err) {
                 return console.log(err);
             }
+
+            // creation of a DOM object
             var doc = new dom().parseFromString(data);
-            var ds = dataset(doc, filename);
-            cat[cat.length] = ds;
-            //console.log(ds.filename + "," + ds.title + "," + ds.topic + "." + ds.organisation + "," + ds.acronyme + "," + ds.department + "," + ds.title);
-            console.log(ds.topic + "," + ds.title);
+
+            // extract the needed information and return a dataset object
+            var dataset = process_xml(doc, filename);
+
+            // add the dataset object to the catalog
+            catalog_array[catalog_array.length] = dataset;
         });
     });
 
-    return cat;
-
+    return catalog_array;
 
 }

@@ -1,3 +1,5 @@
 var processor = require('./process_cat.js');
 
-processor.travers_sitg_xml_cat('./sitg_catalog');
+var cat = processor.travers_sitg_xml_cat('./sitg_catalog');
+
+console.log(JSON.stringify(cat));
